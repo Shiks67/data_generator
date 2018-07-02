@@ -13,5 +13,9 @@ namespace data_generator.Model
         public int country_id { get; set; }
         public int total_price { get; set; }
         public string date { get; set; }
+
+        public int order_details_id { get; set; }
+        public int candy_id { get; set; }
+        public int quantity { get; set; }
     }
 }

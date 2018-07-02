@@ -2,6 +2,7 @@
 using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,26 +51,31 @@ namespace data_generator.Presenter
             da.Close();
         }
 
-        public void InsertData()
+        public void InsertData(List<Order> bulkData)
         {
             DataAccess da = new DataAccess();
 
-            OracleCommand cmd = con.CreateCommand();
+            //OracleCommand cmd = con.CreateCommand();
             string query = sq.InsertData();
-            cmd.CommandText = query;
-
-            cmd.Parameters.Add(new OracleParameter("order_id", 1));
-            cmd.Parameters.Add(new OracleParameter("customer_id", 1));
-            cmd.Parameters.Add(new OracleParameter("country_id", 1));
-            cmd.Parameters.Add(new OracleParameter("total_price", 1));
-            cmd.Parameters.Add(new OracleParameter("date", 1));
-
-            cmd.Parameters.Add(new OracleParameter("orderdetails_id", 1));
-            cmd.Parameters.Add(new OracleParameter("candy_id", 1));
-            cmd.Parameters.Add(new OracleParameter("quantity", 1));
-
             da.Connect();
-            cmd.ExecuteNonQuery();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = bulkData.Count;
+                cmd.Parameters.Add(new OracleParameter("order_id", OracleDbType.Int64, bulkData.Select(c => c.order_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("customer_id", OracleDbType.Int64, bulkData.Select(c => c.customer_id).ToArray(), ParameterDirection.Input)));
+                cmd.Parameters.Add(new OracleParameter("country_id", OracleDbType.Int64, bulkData.Select(c => c.country_id).ToArray(), ParameterDirection.Input)));
+                cmd.Parameters.Add(new OracleParameter("total_price", OracleDbType.Int64, bulkData.Select(c => c.total_price).ToArray(), ParameterDirection.Input)));
+                cmd.Parameters.Add(new OracleParameter("date", OracleDbType.Varchar2, bulkData.Select(c => c.date).ToArray(), ParameterDirection.Input)));
+
+                cmd.Parameters.Add(new OracleParameter("order_details_id", OracleDbType.Int64, bulkData.Select(c => c.order_details_id).ToArray(), ParameterDirection.Input)));
+                cmd.Parameters.Add(new OracleParameter("candy_id", OracleDbType.Int64, bulkData.Select(c => c.candy_id).ToArray(), ParameterDirection.Input)));
+                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int64, bulkData.Select(c => c.quantity).ToArray(), ParameterDirection.Input)));
+
+                cmd.ExecuteNonQuery();
+            }
             da.Close();
         }
     }

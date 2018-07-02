@@ -18,7 +18,7 @@ namespace data_generator.Model
         public string InsertData()
         {
             return "INSERT INTO order VALUES(:order_id,:customer_id,:country_id,:total_price,:date); " +
-                "INSERT INTO order_details VALUES(:orderdetails_id,:order_id,:candy_id,:quantity);";
+                "INSERT INTO order_details VALUES(:order_details_id,:order_id,:candy_id,:quantity);";
         }
     }
 }
