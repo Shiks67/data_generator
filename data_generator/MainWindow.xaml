@@ -1,0 +1,12 @@
+﻿<Window x:Class="data_generator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:data_generator"
+        mc:Ignorable="d"
+        Title="Générateur de données - Le palais du bonbon" Height="481" Width="808">
+    <Grid>
+        <Frame x:Name="frame" NavigationUIVisibility="Hidden"/>
+    </Grid>
+</Window>
