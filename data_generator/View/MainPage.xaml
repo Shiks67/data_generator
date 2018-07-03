@@ -14,6 +14,7 @@
             <TextBox x:Name="nb_order" TextWrapping="Wrap" Width="120"/>
         </StackPanel>
         <Button x:Name="Gen_btn" Content="Générer" HorizontalAlignment="Left" Margin="318,160,0,0" VerticalAlignment="Top" Width="76" Click="Gen_btn_Click"/>
+        <Button x:Name="Populate_btn" Content="Remplir la BDD" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,114,0,0" Click="Populate_btn_Click"/>
 
     </Grid>
 </Page>

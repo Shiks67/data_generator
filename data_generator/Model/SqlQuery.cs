@@ -15,6 +15,38 @@ namespace data_generator.Model
                 "(SELECT COUNT(*) FROM country) AS country;";
         }
 
+        public string InsertAllCandy()
+        {
+            return "INSERT INTO candy VALUES(:candy_id,:candy_name,:additive,:coating,:aroma,:gelling,:sugar," +
+                ":manufacturing_cost,:packaging_cost,:sending_cost,:general_cost," +
+                ":bag_price,:box_price,:sample_price)";
+        }
+
+        public string InsertCandyColor()
+        {
+            return "INSERT INTO candy_color VALUES(:color_id,:color_name)";
+        }
+
+        public string InsertCandyVariant()
+        {
+            return "INSERT INTO candy_variant VALUES(:variant_id,:variant_name)";
+        }
+
+        public string InsertCandyTexture()
+        {
+            return "INSERT INTO candy_texture VALUES(:texture_id,:texture_name)";
+        }
+
+        public string InsertCandyPackaging()
+        {
+            return "INSERT INTO candy_packaging VALUES(:packaging_id,:packaging_name)";
+        }
+
+        public string InsertCandyReference()
+        {
+            return "INSERT INTO candy_reference VALUES(:candy_ref_id,:candy_id,:color_id,:variant_id,:texture_id,:packaging_id)";
+        }
+
         public string InsertData()
         {
             return "INSERT INTO order VALUES(:order_id,:customer_id,:country_id,:total_price,:date); " +

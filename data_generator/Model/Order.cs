@@ -15,7 +15,7 @@ namespace data_generator.Model
         public string date { get; set; }
 
         public int order_details_id { get; set; }
-        public int candy_id { get; set; }
+        public int candy_ref_id { get; set; }
         public int quantity { get; set; }
     }
 }
