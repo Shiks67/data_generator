@@ -187,5 +187,23 @@ namespace data_generator.Presenter
             }
             Close();
         }
+
+        //Au cas où si je dois faire l'etl
+        public void GetData()
+        {
+            OracleCommand cmd = con.CreateCommand();
+            string query = ""; //requete select des données à insert dans mongoDB
+            cmd.CommandText = query;
+
+            Connect();
+            OracleDataReader reader = cmd.ExecuteReader();
+
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                //List<> des tables à récup
+            }
+
+            Close();
+        }
     }
 }
