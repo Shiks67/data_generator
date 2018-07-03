@@ -42,15 +42,20 @@ namespace data_generator.Model
             return "INSERT INTO candy_packaging VALUES(:packaging_id,:packaging_name)";
         }
 
-        public string InsertCandyReference()
+        public string InsertCandyRefAndStock()
         {
-            return "INSERT INTO candy_reference VALUES(:candy_ref_id,:candy_id,:color_id,:variant_id,:texture_id,:packaging_id)";
+            return "BEGIN" +
+                "INSERT INTO candy_reference VALUES(:candy_ref_id,:candy_id,:color_id,:variant_id,:texture_id,:packaging_id);" +
+                "INSERT INTO stock VALUES(:stock_id,:candy_ref_id,:quantity_stock);" +
+                "END;";
         }
 
         public string InsertData()
         {
-            return "INSERT INTO order VALUES(:order_id,:customer_id,:country_id,:total_price,:date); " +
-                "INSERT INTO order_details VALUES(:order_details_id,:order_id,:candy_id,:quantity);";
+            return "BEGIN" +
+                "INSERT INTO order VALUES(:order_id,:customer_id,:country_id,:total_price,:date); " +
+                "INSERT INTO order_details VALUES(:order_details_id,:order_id,:candy_id,:quantity);" +
+                "END;";
         }
     }
 }

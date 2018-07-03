@@ -14,5 +14,6 @@ namespace data_generator.Model
         public int Variant_id { get; set; }
         public int Texture_id { get; set; }
         public int Packaging_id { get; set; }
+        public int Candy_quantity { get; set; }
     }
 }

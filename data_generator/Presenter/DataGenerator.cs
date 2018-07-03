@@ -11,12 +11,11 @@ namespace data_generator.Presenter
     {
         DataAccess da;
 
-        public static List<Order> oList;
+        private List<Order> oList = new List<Order>();
         private List<CandyReference> allCandys = new List<CandyReference>();
 
         public void GenerateOrder(int nbOrder)
         {
-            oList = new List<Order>();
             da.GetDataRows();
             Random rnd = new Random();
 
@@ -31,10 +30,9 @@ namespace data_generator.Presenter
                     date = "" + rnd.Next(1, 28) + "" + rnd.Next(1, 12) + "" + rnd.Next(2015, 218),
                     order_details_id = i + 1,
                     candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
-                    quantity = rnd.Next(1, 50)
+                    quantity = rnd.Next(10, 30)
                 });
             }
-
             da = new DataAccess();
             da.InsertOrder(oList);
             oList.Clear();
@@ -42,6 +40,8 @@ namespace data_generator.Presenter
 
         public void GenerateCandyReference()
         {
+            Random rnd = new Random();
+
             int id = 0;
             for (int a = 0; a < PopulateDB.candy.Count(); a++)
             {
@@ -61,7 +61,8 @@ namespace data_generator.Presenter
                                     Color_id = PopulateDB.color[b].id,
                                     Variant_id = PopulateDB.variant[c].id,
                                     Texture_id = PopulateDB.texture[d].id,
-                                    Packaging_id = PopulateDB.packaging[e].id
+                                    Packaging_id = PopulateDB.packaging[e].id,
+                                    Candy_quantity = rnd.Next(20, 60)
                                 });
                             }
                         }
