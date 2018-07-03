@@ -95,7 +95,7 @@ namespace data_generator.Presenter
                             color.Add(new CandyColor
                             {
                                 id = id,
-                                name = fields[0]
+                                name = fields[13]
                             });
                         }
                         else if (i == 14 && fields[i] != "")
@@ -103,7 +103,7 @@ namespace data_generator.Presenter
                             variant.Add(new CandyVariant
                             {
                                 id = id,
-                                name = fields[0]
+                                name = fields[14]
                             });
                         }
                         else if (i == 15 && fields[i] != "")
@@ -111,7 +111,7 @@ namespace data_generator.Presenter
                             texture.Add(new CandyTexture
                             {
                                 id = id,
-                                name = fields[0]
+                                name = fields[15]
                             });
                         }
                         else if (i == 16 && fields[i] != "")
@@ -119,7 +119,7 @@ namespace data_generator.Presenter
                             packaging.Add(new CandyPackaging
                             {
                                 id = id,
-                                name = fields[0]
+                                name = fields[16]
                             }); ;
                         }
                     }
