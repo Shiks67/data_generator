@@ -33,7 +33,7 @@ namespace data_generator.View
         private void Gen_btn_Click(object sender, RoutedEventArgs e)
         {
             if(nb_order.Text != "")
-            {dg.GenerateOrder(Convert.ToInt32(nb_order.Text));}
+            {dg.GenerateOrder(Convert.ToInt32(nb_order.Text), Convert.ToInt32(nb_min.Text), Convert.ToInt32(nb_max.Text));}
         }
 
         private void Populate_btn_Click(object sender, RoutedEventArgs e)
@@ -49,6 +49,11 @@ namespace data_generator.View
         private void Add_machine_condi_Click(object sender, RoutedEventArgs e)
         {
             pDB.OpenMachineCondiCsvFile();
+        }
+
+        private void gen_machine_use_Click(object sender, RoutedEventArgs e)
+        {
+            dg.GenerateMachineUse();
         }
     }
 }

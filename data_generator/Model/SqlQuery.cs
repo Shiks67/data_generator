@@ -79,5 +79,18 @@ namespace data_generator.Model
         {
             return "INSERT INTO machine_condi VALUES(:machine_id,:id_packaging,:cadence,:change_tools)";
         }
+
+        public string GetCandySent()
+        {
+            return "SELECT id_candy_reference, (SELECT id_variant from candy_reference WHERE id_candy_reference = order_details.id_candy_reference)," +
+                "(SELECT id_packaging from candy_reference WHERE id_candy_reference = order_details.id_candy_reference), " +
+                "(SELECT order_date from orders where order_id = order_details.order_id) " +
+                "FROM order_details";
+        }
+
+        public string GetMachineFab()
+        {
+            return "SELECT ";
+        }
     }
 }

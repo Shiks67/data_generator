@@ -26,19 +26,6 @@ namespace data_generator.Presenter
         public static int nbOD;
         public static int nbCountry;
 
-        void Connect()
-        {
-            con = new OracleConnection
-            {
-                ConnectionString = "Data Source=(DESCRIPTION =" +
-                "(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.43.105)(PORT = 1521))" +
-                "(CONNECT_DATA =(SERVER = DEDICATED)" +
-                "(SERVICE_NAME = PBigData))); " +
-                "User Id=Generateur_Donnes;Password=azer123*"
-            };
-            con.Open();
-        }
-
         void Close()
         {
             con.Close();
@@ -47,7 +34,7 @@ namespace data_generator.Presenter
 
         public void GetDataRows()
         {
-            Connect();
+            con.Open();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.CountCandyData();
             cmd.CommandText = query;
@@ -60,14 +47,13 @@ namespace data_generator.Presenter
                 nbCountry = Convert.ToInt32(reader.GetValue(2));
                 nbOD = Convert.ToInt32(reader.GetValue(3));
             }
-
             Close();
         }
 
         public void InsertOrder(List<Order> orders, List<OrderDetails> orderDetails)
         {
             string query = sq.InsertOrders();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -85,7 +71,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertOrdersDetails();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -103,10 +89,35 @@ namespace data_generator.Presenter
             Close();
         }
 
+        public List<CandySent> GetCandyData()
+        {
+            List<CandySent> candySent = new List<CandySent>();
+            con.Open();
+            OracleCommand cmd = con.CreateCommand();
+            string query = sq.GetCandySent();
+            cmd.CommandText = query;
+            OracleDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                candySent.Add(new CandySent
+                {
+                    Candy_ref_id = Convert.ToInt32(reader.GetValue(0)),
+                    Variant_id = Convert.ToInt32(reader.GetValue(1)),
+                    Package_id = Convert.ToInt32(reader.GetValue(2)),
+                    Date = reader.GetValue(3).ToString()
+                });
+
+            }
+            Close();
+
+            return candySent;
+        }
+
         public void InsertData()
         {
-            /*string query = sq.InsertCandyColor();
-            Connect();
+            string query = sq.InsertCandyColor();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -120,7 +131,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyVariant();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -134,7 +145,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyTexture();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -148,7 +159,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyPackaging();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -159,10 +170,10 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("packaging_name", OracleDbType.Varchar2, PopulateDB.packaging.Select(c => c.name).ToArray(), ParameterDirection.Input));
                 cmd.ExecuteNonQuery();
             }
-            Close();*/
+            Close();
 
-            string query = sq.InsertAllCandy();
-            Connect();
+            query = sq.InsertAllCandy();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -190,8 +201,8 @@ namespace data_generator.Presenter
 
         public void InsertAllCandyRef(List<CandyReference> bulkData)
         {
-            /*string query = sq.InsertCandyRef();
-            Connect();
+            string query = sq.InsertCandyRef();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -210,10 +221,10 @@ namespace data_generator.Presenter
 
                 cmd.ExecuteNonQuery();
             }
-            Close();*/
+            Close();
 
-            string query = sq.InsertCandyStock();
-            Connect();
+            query = sq.InsertCandyStock();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -233,7 +244,7 @@ namespace data_generator.Presenter
         internal void InsertCountryShippingData(List<Country> country, List<Shipping> shipping)
         {
             string query = sq.InsertShipping();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -250,7 +261,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCountry();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -270,7 +281,7 @@ namespace data_generator.Presenter
         public void InsertCondiMachine(List<MachinePackaging> machinePackagings)
         {
             string query = sq.InsertPackagingMachine();
-            Connect();
+            con.Open();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -294,7 +305,7 @@ namespace data_generator.Presenter
             string query = ""; //requete select des données à insert dans mongoDB
             cmd.CommandText = query;
 
-            Connect();
+            con.Open();
             OracleDataReader reader = cmd.ExecuteReader();
 
             for (int i = 0; i < reader.FieldCount; i++)

@@ -5,17 +5,21 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:data_generator.View"
       mc:Ignorable="d"
-      Title="MainPage" Width="500" Height="200">
+      Title="MainPage" Width="520" Height="350">
     <Grid>
         <Label Content="Palais du bonbon" FontSize="20" Margin="159,23,0,0" HorizontalAlignment="Left" Width="163" Height="37" VerticalAlignment="Top"/>
         <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Margin="12,94,0,0">
             <Label Content="Nombre de commandes :"/>
             <TextBox x:Name="nb_order" TextWrapping="Wrap" Width="120"/>
         </StackPanel>
-        <Button x:Name="Gen_btn" Content="Générer" HorizontalAlignment="Left" Margin="320,97,0,0" VerticalAlignment="Top" Width="76" Click="Gen_btn_Click"/>
-        <Button x:Name="Populate_btn" Content="Ajout infos bonbon" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="12,156,0,0" Click="Populate_btn_Click"/>
-        <Button x:Name="Add_country_shipping" Content="Ajout infos livraison-pays" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="161,156,0,0" Click="Add_country_shipping_Click"/>
-        <Button x:Name="Add_machine_condi" Content="Machine conditionnement" HorizontalAlignment="Left" Margin="332,156,0,0" VerticalAlignment="Top" Click="Add_machine_condi_Click"/>
+        <Button x:Name="Gen_btn" Content="Générer" HorizontalAlignment="Left" Margin="428,138,0,0" VerticalAlignment="Top" Width="76" Click="Gen_btn_Click"/>
+        <Button x:Name="Populate_btn" Content="Ajout des références" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,234,0,0" Click="Populate_btn_Click"/>
+        <Button x:Name="Add_country_shipping" Content="Ajout infos livraison et pays" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,286,0,0" Click="Add_country_shipping_Click"/>
+        <Button x:Name="Add_machine_condi" Content="Machine conditionnement" HorizontalAlignment="Left" Margin="10,312,0,0" VerticalAlignment="Top" Click="Add_machine_condi_Click"/>
+        <Label Content="Nombre de référence &#xD;&#xA;par commandes :" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13,125,0,0"/>
+        <TextBox x:Name="nb_min" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Min" VerticalAlignment="Top" Width="120" Margin="156,135,0,0"/>
+        <TextBox x:Name="nb_max" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" Text="Max" VerticalAlignment="Top" Width="120" Margin="281,135,0,0"/>
+        <Button x:Name="gen_machine_use" Content="Générer l'utilisation des machines" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top" Click="gen_machine_use_Click"/>
 
     </Grid>
 </Page>

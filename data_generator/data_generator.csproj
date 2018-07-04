@@ -85,6 +85,7 @@
     <Compile Include="Model\CandyColor.cs" />
     <Compile Include="Model\CandyPackaging.cs" />
     <Compile Include="Model\CandyReference.cs" />
+    <Compile Include="Model\CandySent.cs" />
     <Compile Include="Model\CandyTexture.cs" />
     <Compile Include="Model\CandyVariant.cs" />
     <Compile Include="Model\Carton.cs" />

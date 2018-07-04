@@ -16,7 +16,7 @@ namespace data_generator.Presenter
 
         private List<CandyReference> allCandys = new List<CandyReference>();
 
-        public void GenerateOrder(int nbOrder)
+        public void GenerateOrder(int nbOrder, int nbMin, int nbMax)
         {
             da.GetDataRows();
             Random rnd = new Random();
@@ -36,7 +36,7 @@ namespace data_generator.Presenter
                     candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
                     quantity = rnd.Next(10, 30)
                 });
-                int lines = rnd.Next(1, 5);
+                int lines = rnd.Next(nbMin, nbMax);
                 for (int y = 0; y < lines; y++)
                 {
                     odID++;
@@ -49,7 +49,6 @@ namespace data_generator.Presenter
                     });
                 }
             }
-            da = new DataAccess();
             da.InsertOrder(oList, odList);
             oList.Clear();
         }
@@ -87,6 +86,12 @@ namespace data_generator.Presenter
                 }
             }
             da.InsertAllCandyRef(allCandys);
+        }
+
+        public void GenerateMachineUse()
+        {
+            List<CandySent> candySent = new List<CandySent>();
+            candySent = da.GetCandyData();
         }
     }
 }
