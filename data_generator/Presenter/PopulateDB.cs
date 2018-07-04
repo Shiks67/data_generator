@@ -29,7 +29,7 @@ namespace data_generator.Presenter
         private bool skipHeader = false;
         private TextFieldParser csvParser;
 
-        public void OpenCsvFile()
+        public void OpenCandyCsvFile()
         {
             //ouvre une fenêtre de recherche de fichier avec le filtre .csv
             OpenFileDialog xlsxPath = new OpenFileDialog
@@ -54,13 +54,44 @@ namespace data_generator.Presenter
 
                     //lance la tâche
                     //pour parser et inserer les données
-                    insertCSV = Task.Run(() => { PrepareData(); });
+                    insertCSV = Task.Run(() => { PrepareCandyData(); });
                     insertCSV.Wait();
                 }
             }
         }
 
-        private void PrepareData()
+        public void OpenCountryShippingCsvFile()
+        {
+            //ouvre une fenêtre de recherche de fichier avec le filtre .csv
+            OpenFileDialog xlsxPath = new OpenFileDialog
+            {
+                Filter = "fichier .csv | *.csv"
+            };
+
+            //Si un fichier est sélectionné
+            if (xlsxPath.ShowDialog() == DialogResult.OK)
+            {
+                Task insertCSV;
+                using (csvParser = new TextFieldParser(xlsxPath.FileName))
+                {
+                    //Paramètres du parser csv
+                    csvParser.CommentTokens = new string[] { commentToken };
+                    csvParser.SetDelimiters(new string[] { delimiter });
+                    csvParser.HasFieldsEnclosedInQuotes = isFieldInQuotes;
+                    if (skipHeader)
+                    {
+                        csvParser.ReadLine();
+                    }
+
+                    //lance la tâche
+                    //pour parser et inserer les données
+                    insertCSV = Task.Run(() => { PrepareCountryShippingData(); });
+                    insertCSV.Wait();
+                }
+            }
+        }
+
+        private void PrepareCandyData()
         {
             int id = 1;
             while (!csvParser.EndOfData)
@@ -132,6 +163,94 @@ namespace data_generator.Presenter
             }
             da.InsertData();
             dg.GenerateCandyReference();
+        }
+
+        private void PrepareCountryShippingData()
+        {
+            List<Country> country = new List<Country>();
+            List<Shipping> shipping = new List<Shipping>();
+
+            /*List<Container> container = new List<Container>();
+            List<Carton> carton = new List<Carton>();
+            List<Pallets> pallets = new List<Pallets>();
+            List<CandyPackaging> candyPackaging = new List<CandyPackaging>();
+
+            List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
+            List<MachineManufacture> machineManufacture = new List<MachineManufacture>();*/
+
+            int id = 1;
+            while (!csvParser.EndOfData)
+            {
+                try
+                {
+                    string[] fields = csvParser.ReadFields();
+                    for (int i = 0; i <= fields.Count() - 1; i++)
+                    {
+                        if (i == 0 && fields[i] != "")
+                        {
+                            shipping.Add(new Shipping
+                            {
+                                Shipping_id = id,
+                                Name = fields[0],
+                                Quantity = Convert.ToInt32(fields[1])
+                            });
+                        }
+                        else if (i == 0 && fields[i] != "")
+                        {
+                            country.Add(new Country
+                            {
+                                Country_id = id,
+                                Name = fields[2],
+                                Shipping_id = Convert.ToInt32(from lid in shipping where lid.Name == fields[3] select lid.Shipping_id)
+                            });
+                        }
+                        /*else if (i == 0 && fields[i] != "")
+                        {
+                            candyPackaging.Add(new CandyPackaging
+                            {
+                                id = id,
+                                name = fields[0]
+                            });
+                        }
+                        else if (i == 13 && fields[i] != "")
+                        {
+                            container.Add(new Container
+                            {
+                                Container_id = id,
+                                Packaging_id = Convert.ToInt32(from lid in candyPackaging where lid.name == fields[9] select lid.id),
+                                Quantity = Convert.ToInt32(fields[5])
+                            });
+                        }
+                        else if (i == 13 && fields[i] != "")
+                        {
+                            pallets.Add(new Pallets
+                            {
+                                Pallets_id = id,
+                                Shipping_id = Convert.ToInt32(from lid in shipping where lid.Name == fields[9] select lid.Shipping_id),
+                                Quantity = Convert.ToInt32(fields[9])
+
+                            });
+                        }
+                        else if (i == 13 && fields[i] != "")
+                        {
+                            machinePackaging.Add(new MachinePackaging
+                            {
+                                Machine_id = id,
+                                Cadence = Convert.ToInt32(fields[9]),
+                                Tool_change = Convert.ToInt32(fields[9]),
+                                Packaging_id = Convert.ToInt32(from lid in candyPackaging where lid.name == fields[9] select lid.id)
+                                //Convert.ToInt32(candyPackaging.Select(c => c.id).Where( = fields[10])
+                            });
+                        }*/
+                    }
+                    id++;
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    throw;
+                }
+            }
+            da.InsertCountryShippingData(country, shipping);
         }
     }
 }

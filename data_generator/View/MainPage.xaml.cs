@@ -28,6 +28,7 @@ namespace data_generator.View
         }
 
         DataGenerator dg = new DataGenerator();
+        PopulateDB pDB = new PopulateDB();
 
         private void Gen_btn_Click(object sender, RoutedEventArgs e)
         {
@@ -57,8 +58,12 @@ namespace data_generator.View
 
         private void Populate_btn_Click(object sender, RoutedEventArgs e)
         {
-            PopulateDB pDB = new PopulateDB();
-            pDB.OpenCsvFile();
+            pDB.OpenCandyCsvFile();
+        }
+
+        private void Add_country_shipping_Click(object sender, RoutedEventArgs e)
+        {
+            pDB.OpenCountryShippingCsvFile();
         }
     }
 }

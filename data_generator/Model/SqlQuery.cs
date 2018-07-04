@@ -50,6 +50,16 @@ namespace data_generator.Model
                 "END;";
         }
 
+        public string InsertShipping()
+        {
+            return "INSERT INTO Shipping VALUES(:id,:name,:quantity)";
+        }
+
+        public string InsertCountry()
+        {
+            return "INSERT INTO Country VALUES(:id,:name,:shipping_id)";
+        }
+
         public string InsertData()
         {
             return "BEGIN" +

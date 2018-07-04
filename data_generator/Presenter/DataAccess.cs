@@ -188,6 +188,43 @@ namespace data_generator.Presenter
             Close();
         }
 
+        internal void InsertCountryShippingData(List<Country> country, List<Shipping> shipping)
+        {
+            string query = sq.InsertShipping();
+            Connect();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = shipping.Count;
+
+                cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, shipping.Select(c => c.Shipping_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("name", OracleDbType.Varchar2, shipping.Select(c => c.Name).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, shipping.Select(c => c.Quantity).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+
+            query = sq.InsertCountry();
+            Connect();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = country.Count;
+
+                cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, country.Select(c => c.Country_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("name", OracleDbType.Varchar2, country.Select(c => c.Name).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("shipping_id", OracleDbType.Int32, country.Select(c => c.Shipping_id).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+        }
+
         //Au cas où si je dois faire l'etl
         public void GetData()
         {
