@@ -79,8 +79,8 @@ namespace data_generator.Presenter
                 cmd.BindByName = true;
                 cmd.ArrayBindCount = orderDetails.Count;
 
-                cmd.Parameters.Add(new OracleParameter("order_details_id", OracleDbType.Int32, orderDetails.Select(c => c.order_details_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("re_order_id", OracleDbType.Int32, orderDetails.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
+                cmd.Parameters.Add(new OracleParameter("order_line", OracleDbType.Int32, orderDetails.Select(c => c.order_line).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("order_id", OracleDbType.Int32, orderDetails.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
                 cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, orderDetails.Select(c => c.candy_ref_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, orderDetails.Select(c => c.quantity).ToArray(), ParameterDirection.Input));
 
@@ -112,6 +112,52 @@ namespace data_generator.Presenter
             Close();
 
             return candySent;
+        }
+
+        public List<MachineManufacture> GetMachineManufactureData()
+        {
+            List<MachineManufacture> machineManufacture = new List<MachineManufacture>();
+            con.Open();
+            OracleCommand cmd = con.CreateCommand();
+            string query = sq.GetMachineManufacture();
+            cmd.CommandText = query;
+            OracleDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                machineManufacture.Add(new MachineManufacture
+                {
+                    Machine_id = Convert.ToInt32(reader.GetValue(0)),
+                    candy_variant_id = Convert.ToInt32(reader.GetValue(1))
+                });
+
+            }
+            Close();
+
+            return machineManufacture;
+        }
+
+        public List<MachinePackaging> GetMachinePackagingData()
+        {
+            List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
+            con.Open();
+            OracleCommand cmd = con.CreateCommand();
+            string query = sq.GetMachinePackaging();
+            cmd.CommandText = query;
+            OracleDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                machinePackaging.Add(new MachinePackaging
+                {
+                    Machine_id = Convert.ToInt32(reader.GetValue(0)),
+                    Packaging_id = Convert.ToInt32(reader.GetValue(1))
+                });
+
+            }
+            Close();
+
+            return machinePackaging;
         }
 
         public void InsertData()
@@ -292,6 +338,45 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("id_packaging", OracleDbType.Int32, machinePackagings.Select(c => c.Packaging_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("cadence", OracleDbType.Int32, machinePackagings.Select(c => c.Cadence).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("change_tools", OracleDbType.Int32, machinePackagings.Select(c => c.Tool_change).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+        }
+
+        public void InsertMachineWork(List<MachineWork> mp, List<MachineWork> mm)
+        {
+            string query = sq.InsertmpWork();
+            con.Open();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = mp.Count;
+
+                cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, mp.Select(c => c.Id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("machine_id", OracleDbType.Int32, mp.Select(c => c.Machine_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, mp.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("mw_date", OracleDbType.Varchar2, mp.Select(c => c.Date).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+
+            query = sq.InsertmmWork();
+            con.Open();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = mm.Count;
+
+                cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, mm.Select(c => c.Id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("machine_id", OracleDbType.Int32, mm.Select(c => c.Machine_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, mm.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("mw_date", OracleDbType.Varchar2, mm.Select(c => c.Date).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
             }

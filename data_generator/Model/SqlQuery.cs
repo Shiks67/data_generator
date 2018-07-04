@@ -72,12 +72,22 @@ namespace data_generator.Model
 
         public string InsertOrdersDetails()
         {
-            return "INSERT INTO order_details VALUES(:order_details_id,:candy_ref_id,:re_order_id,:quantity)";
+            return "INSERT INTO order_details VALUES(:order_line,:candy_ref_id,:order_id,:quantity)";
         }
 
         public string InsertPackagingMachine()
         {
             return "INSERT INTO machine_condi VALUES(:machine_id,:id_packaging,:cadence,:change_tools)";
+        }
+
+        public string InsertmmWork()
+        {
+            return "INSERT INTO Machine_fab_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date)";
+        }
+
+        public string InsertmpWork()
+        {
+            return "INSERT INTO Machine_condi_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date)";
         }
 
         public string GetCandySent()
@@ -88,9 +98,14 @@ namespace data_generator.Model
                 "FROM order_details";
         }
 
-        public string GetMachineFab()
+        public string GetMachineManufacture()
         {
-            return "SELECT ";
+            return "SELECT id_variant, id_machine_fab FROM associe";
+        }
+
+        public string GetMachinePackaging()
+        {
+            return "SELECT id_machine_condi, id_packaging FROM machine_condi";
         }
     }
 }

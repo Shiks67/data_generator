@@ -93,6 +93,7 @@
     <Compile Include="Model\Country.cs" />
     <Compile Include="Model\MachineManufacture.cs" />
     <Compile Include="Model\MachinePackaging.cs" />
+    <Compile Include="Model\MachineWork.cs" />
     <Compile Include="Model\Order.cs" />
     <Compile Include="Model\OrderDetails.cs" />
     <Compile Include="Model\Pallets.cs" />

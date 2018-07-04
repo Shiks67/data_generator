@@ -20,7 +20,7 @@ namespace data_generator.Presenter
         {
             da.GetDataRows();
             Random rnd = new Random();
-            int odID = DataAccess.nbOD;
+            int odID = 0;
 
             for (int i = 0; i < nbOrder; i++)
             {
@@ -32,9 +32,6 @@ namespace data_generator.Presenter
                     country_id = rnd.Next(1, DataAccess.nbCountry),
                     total_price = rnd.Next(1, 50),
                     date = rnd.Next(01, 28) + "/" + rnd.Next(01, 12) + "/" + rnd.Next(2015, 2018),
-                    order_details_id = i + 1,
-                    candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
-                    quantity = rnd.Next(10, 30)
                 });
                 int lines = rnd.Next(nbMin, nbMax);
                 for (int y = 0; y < lines; y++)
@@ -42,12 +39,13 @@ namespace data_generator.Presenter
                     odID++;
                     odList.Add(new OrderDetails
                     {
-                        order_details_id = odID,
+                        order_line = odID,
                         candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
                         order_id = ordId,
                         quantity = rnd.Next(1, 5)
                     });
                 }
+                odID = 0;
             }
             da.InsertOrder(oList, odList);
             oList.Clear();
@@ -92,6 +90,46 @@ namespace data_generator.Presenter
         {
             List<CandySent> candySent = new List<CandySent>();
             candySent = da.GetCandyData();
+
+            List<MachineManufacture> machineManufcature = new List<MachineManufacture>();
+            machineManufcature = da.GetMachineManufactureData();
+
+            List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
+            machinePackaging = da.GetMachinePackagingData();
+
+            List<MachineWork> mmWork = new List<MachineWork>();
+            List<MachineWork> mpWork = new List<MachineWork>();
+
+            int id = 0;
+            Random rnd = new Random();
+
+            foreach (var cs in candySent)
+            {
+                id++;
+
+                string d = (Convert.ToInt32(cs.Date.Split('/')[0]) - rnd.Next(1, Convert.ToInt32(cs.Date.Split('/')[0]))).ToString();
+                string m = (Convert.ToInt32(cs.Date.Split('/')[1]) - rnd.Next(1, Convert.ToInt32(cs.Date.Split('/')[1]))).ToString();
+                string y = cs.Date.Split('/')[2];
+
+                string date = d + m + y + " " + rnd.Next(0, 23) + ":" + rnd.Next(0, 59) + ":" + rnd.Next(0, 59);
+
+                mmWork.Add(new MachineWork
+                {
+                    Id = id,
+                    Machine_id = machineManufcature.Single(mm => mm.candy_variant_id == cs.Variant_id).Machine_id,
+                    Candy_ref_id = cs.Candy_ref_id,
+                    Date = date
+                });
+
+                mpWork.Add(new MachineWork
+                {
+                    Id = id,
+                    Machine_id = machinePackaging.Single(mp => mp.Packaging_id == cs.Package_id).Machine_id,
+                    Candy_ref_id = cs.Candy_ref_id,
+                    Date = date
+                });
+            }
+            da.InsertMachineWork(mpWork,mmWork);
         }
     }
 }
