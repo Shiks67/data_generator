@@ -32,28 +32,8 @@ namespace data_generator.View
 
         private void Gen_btn_Click(object sender, RoutedEventArgs e)
         {
-            //if(nb_order.Text != "")
-            //{dg.GenerateOrder(Convert.ToInt32(nb_order.Text));}
-            string connectionString = "Data Source=(DESCRIPTION=(CID=GTU_APP)(ADDRESS_LIST=(ADDRESS=" +
-                "(PROTOCOL=TCP)(HOST=192.168.43.105)(PORT=1521)))" +
-                "(CONNECT_DATA=(SID=PBigData) (SERVER=DEDICATED)));" +
-                "User Id=Generateur_Donnes;Password=azer123*";
-            //string cnxstring = "User Id=Generateur_Donnes@192.168.43.105;Password=azer123";
-            using (var conn = new OracleConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    MessageBox.Show("ça marche");
-
-                }
-                catch
-                {
-                    MessageBox.Show("ça marche pas");
-                    throw;
-
-                }
-            }
+            if(nb_order.Text != "")
+            {dg.GenerateOrder(Convert.ToInt32(nb_order.Text));}
         }
 
         private void Populate_btn_Click(object sender, RoutedEventArgs e)
@@ -64,6 +44,11 @@ namespace data_generator.View
         private void Add_country_shipping_Click(object sender, RoutedEventArgs e)
         {
             pDB.OpenCountryShippingCsvFile();
+        }
+
+        private void Add_machine_condi_Click(object sender, RoutedEventArgs e)
+        {
+            pDB.OpenMachineCondiCsvFile();
         }
     }
 }

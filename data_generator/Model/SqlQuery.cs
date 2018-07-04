@@ -10,9 +10,11 @@ namespace data_generator.Model
     {
         public string CountCandyData()
         {
-            return "SELECT (SELECT COUNT(*) FROM candy) AS candy, " +
-                "(SELECT COUNT(*) FROM order) AS order" +
-                "(SELECT COUNT(*) FROM country) AS country;";
+            return "SELECT (SELECT COUNT(*) FROM candy_reference) AS candy, " +
+                "(SELECT COUNT(*) FROM orders) AS orders," +
+                "(SELECT COUNT(*) FROM country) AS country, " +
+                "(SELECT COUNT(*) FROM order_details) AS od " +
+                "FROM country";
         }
 
         public string InsertAllCandy()
@@ -42,30 +44,40 @@ namespace data_generator.Model
             return "INSERT INTO candy_packaging VALUES(:packaging_id,:packaging_name)";
         }
 
-        public string InsertCandyRefAndStock()
+        public string InsertCandyRef()
         {
-            return "BEGIN" +
-                "INSERT INTO candy_reference VALUES(:candy_ref_id,:candy_id,:color_id,:variant_id,:texture_id,:packaging_id);" +
-                "INSERT INTO stock VALUES(:stock_id,:candy_ref_id,:quantity_stock);" +
-                "END;";
+            return "INSERT INTO candy_reference VALUES(:candy_ref_id,:variant_id,:candy_id,:texture_id,'0',:packaging_id,:color_id,:candy_ref_code)";
+        }
+
+        public string InsertCandyStock()
+        {
+            return "INSERT INTO stock VALUES(:stock_id,:stock_candy_ref_id,:quantity_stock)";
+
         }
 
         public string InsertShipping()
         {
-            return "INSERT INTO Shipping VALUES(:id,:name,:quantity)";
+            return "INSERT INTO delivery_type VALUES(:id,:name,:quantity)";
         }
 
         public string InsertCountry()
         {
-            return "INSERT INTO Country VALUES(:id,:name,:shipping_id)";
+            return "INSERT INTO Country VALUES(:id,:shipping_id,:name)";
         }
 
-        public string InsertData()
+        public string InsertOrders()
         {
-            return "BEGIN" +
-                "INSERT INTO order VALUES(:order_id,:customer_id,:country_id,:total_price,:date); " +
-                "INSERT INTO order_details VALUES(:order_details_id,:order_id,:candy_id,:quantity);" +
-                "END;";
+            return "INSERT INTO orders VALUES(:order_id,:country_id,:customer_id,:total_price,:order_date)";
+        }
+
+        public string InsertOrdersDetails()
+        {
+            return "INSERT INTO order_details VALUES(:order_details_id,:candy_ref_id,:re_order_id,:quantity)";
+        }
+
+        public string InsertPackagingMachine()
+        {
+            return "INSERT INTO machine_condi VALUES(:machine_id,:id_packaging,:cadence,:change_tools)";
         }
     }
 }

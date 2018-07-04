@@ -9,32 +9,48 @@ namespace data_generator.Presenter
 {
     class DataGenerator
     {
-        DataAccess da;
+        DataAccess da = new DataAccess();
 
         private List<Order> oList = new List<Order>();
+        private List<OrderDetails> odList = new List<OrderDetails>();
+
         private List<CandyReference> allCandys = new List<CandyReference>();
 
         public void GenerateOrder(int nbOrder)
         {
             da.GetDataRows();
             Random rnd = new Random();
+            int odID = DataAccess.nbOD;
 
             for (int i = 0; i < nbOrder; i++)
             {
+                int ordId = DataAccess.nbOrder + i + 1;
                 oList.Add(new Order
                 {
-                    order_id = DataAccess.nbOrder + i + 1,
-                    customer_id = rnd.Next(1, (nbOrder / 4)),
+                    order_id = ordId,
+                    customer_id = rnd.Next(1, (nbOrder)),
                     country_id = rnd.Next(1, DataAccess.nbCountry),
                     total_price = rnd.Next(1, 50),
-                    date = "" + rnd.Next(1, 28) + "" + rnd.Next(1, 12) + "" + rnd.Next(2015, 218),
+                    date = rnd.Next(01, 28) + "/" + rnd.Next(01, 12) + "/" + rnd.Next(2015, 2018),
                     order_details_id = i + 1,
                     candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
                     quantity = rnd.Next(10, 30)
                 });
+                int lines = rnd.Next(1, 5);
+                for (int y = 0; y < lines; y++)
+                {
+                    odID++;
+                    odList.Add(new OrderDetails
+                    {
+                        order_details_id = odID,
+                        candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
+                        order_id = ordId,
+                        quantity = rnd.Next(1, 5)
+                    });
+                }
             }
             da = new DataAccess();
-            da.InsertOrder(oList);
+            da.InsertOrder(oList, odList);
             oList.Clear();
         }
 
@@ -62,7 +78,8 @@ namespace data_generator.Presenter
                                     Variant_id = PopulateDB.variant[c].id,
                                     Texture_id = PopulateDB.texture[d].id,
                                     Packaging_id = PopulateDB.packaging[e].id,
-                                    Candy_quantity = rnd.Next(20, 60)
+                                    Candy_quantity = rnd.Next(20, 60),
+                                    Candy_ref_code = rnd.Next(100,999999999)
                                 });
                             }
                         }

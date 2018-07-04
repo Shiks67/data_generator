@@ -87,8 +87,15 @@
     <Compile Include="Model\CandyReference.cs" />
     <Compile Include="Model\CandyTexture.cs" />
     <Compile Include="Model\CandyVariant.cs" />
+    <Compile Include="Model\Carton.cs" />
+    <Compile Include="Model\Container.cs" />
+    <Compile Include="Model\Country.cs" />
+    <Compile Include="Model\MachineManufacture.cs" />
+    <Compile Include="Model\MachinePackaging.cs" />
     <Compile Include="Model\Order.cs" />
     <Compile Include="Model\OrderDetails.cs" />
+    <Compile Include="Model\Pallets.cs" />
+    <Compile Include="Model\Shipping.cs" />
     <Compile Include="Model\SqlQuery.cs" />
     <Compile Include="Presenter\DataAccess.cs" />
     <Compile Include="Presenter\DataGenerator.cs" />

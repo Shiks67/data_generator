@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:data_generator"
         mc:Ignorable="d"
-        Title="Générateur de données - Le palais du bonbon" Height="481" Width="808">
+        Title="Générateur de données - Le palais du bonbon" Height="231" Width="508">
     <Grid>
         <Frame x:Name="frame" NavigationUIVisibility="Hidden"/>
     </Grid>

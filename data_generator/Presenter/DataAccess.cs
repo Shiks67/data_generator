@@ -11,18 +11,30 @@ namespace data_generator.Presenter
 {
     class DataAccess
     {
-        OracleConnection con;
+        OracleConnection con = new OracleConnection
+        {
+            ConnectionString = "Data Source=(DESCRIPTION =" +
+                "(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.43.105)(PORT = 1521))" +
+                "(CONNECT_DATA =(SERVER = DEDICATED)" +
+                "(SERVICE_NAME = PBigData))); " +
+                "User Id=Generateur_Donnes;Password=azer123*"
+        };
         SqlQuery sq = new SqlQuery();
 
         public static int nbCandy;
         public static int nbOrder;
+        public static int nbOD;
         public static int nbCountry;
 
         void Connect()
         {
             con = new OracleConnection
             {
-                ConnectionString = "User Id=Generateur_Donnes;Password=azer123*;Data Source=192.168.43.105 DataBase=PBigData"
+                ConnectionString = "Data Source=(DESCRIPTION =" +
+                "(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.43.105)(PORT = 1521))" +
+                "(CONNECT_DATA =(SERVER = DEDICATED)" +
+                "(SERVICE_NAME = PBigData))); " +
+                "User Id=Generateur_Donnes;Password=azer123*"
             };
             con.Open();
         }
@@ -35,42 +47,56 @@ namespace data_generator.Presenter
 
         public void GetDataRows()
         {
+            Connect();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.CountCandyData();
             cmd.CommandText = query;
-
-            Connect();
             OracleDataReader reader = cmd.ExecuteReader();
 
-            for (int i = 0; i < reader.FieldCount; i++)
+            while(reader.Read())
             {
-                nbCandy = Convert.ToInt32(reader[0]);
-                nbOrder = Convert.ToInt32(reader[1]);
-                nbCountry = Convert.ToInt32(reader[2]);
+                nbCandy = Convert.ToInt32(reader.GetValue(0));
+                nbOrder = Convert.ToInt32(reader.GetValue(1));
+                nbCountry = Convert.ToInt32(reader.GetValue(2));
+                nbOD = Convert.ToInt32(reader.GetValue(3));
             }
 
             Close();
         }
 
-        public void InsertOrder(List<Order> bulkData)
+        public void InsertOrder(List<Order> orders, List<OrderDetails> orderDetails)
         {
-            string query = sq.InsertData();
+            string query = sq.InsertOrders();
             Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
                 cmd.CommandType = CommandType.Text;
                 cmd.BindByName = true;
-                cmd.ArrayBindCount = bulkData.Count;
-                cmd.Parameters.Add(new OracleParameter("order_id", OracleDbType.Int32, bulkData.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
-                cmd.Parameters.Add(new OracleParameter("customer_id", OracleDbType.Int32, bulkData.Select(c => c.customer_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("country_id", OracleDbType.Int32, bulkData.Select(c => c.country_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("total_price", OracleDbType.Int32, bulkData.Select(c => c.total_price).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("date", OracleDbType.Varchar2, bulkData.Select(c => c.date).ToArray(), ParameterDirection.Input));
+                cmd.ArrayBindCount = orders.Count;
+                cmd.Parameters.Add(new OracleParameter("order_id", OracleDbType.Int32, orders.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
+                cmd.Parameters.Add(new OracleParameter("customer_id", OracleDbType.Int32, orders.Select(c => c.customer_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("country_id", OracleDbType.Int32, orders.Select(c => c.country_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("total_price", OracleDbType.Int32, orders.Select(c => c.total_price).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("order_date", OracleDbType.Varchar2, orders.Select(c => c.date).ToArray(), ParameterDirection.Input));
 
-                cmd.Parameters.Add(new OracleParameter("order_details_id", OracleDbType.Int32, bulkData.Select(c => c.order_details_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("candy_id", OracleDbType.Int32, bulkData.Select(c => c.candy_ref_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, bulkData.Select(c => c.quantity).ToArray(), ParameterDirection.Input));
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+
+            query = sq.InsertOrdersDetails();
+            Connect();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = orderDetails.Count;
+
+                cmd.Parameters.Add(new OracleParameter("order_details_id", OracleDbType.Int32, orderDetails.Select(c => c.order_details_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("re_order_id", OracleDbType.Int32, orderDetails.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
+                cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, orderDetails.Select(c => c.candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, orderDetails.Select(c => c.quantity).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
             }
@@ -79,7 +105,7 @@ namespace data_generator.Presenter
 
         public void InsertData()
         {
-            string query = sq.InsertCandyColor();
+            /*string query = sq.InsertCandyColor();
             Connect();
             using (var cmd = con.CreateCommand())
             {
@@ -133,9 +159,9 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("packaging_name", OracleDbType.Varchar2, PopulateDB.packaging.Select(c => c.name).ToArray(), ParameterDirection.Input));
                 cmd.ExecuteNonQuery();
             }
-            Close();
+            Close();*/
 
-            query = sq.InsertAllCandy();
+            string query = sq.InsertAllCandy();
             Connect();
             using (var cmd = con.CreateCommand())
             {
@@ -145,7 +171,7 @@ namespace data_generator.Presenter
                 cmd.ArrayBindCount = PopulateDB.candy.Count;
                 cmd.Parameters.Add(new OracleParameter("candy_id", OracleDbType.Int32, PopulateDB.candy.Select(c => c.id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("candy_name", OracleDbType.Varchar2, PopulateDB.candy.Select(c => c.name).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("facturing_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.manufacturing_cost).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("manufacturing_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.manufacturing_cost).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("packaging_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.packaging_cost).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("sending_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.sending_cost).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("general_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.general_cost).ToArray(), ParameterDirection.Input));
@@ -164,7 +190,7 @@ namespace data_generator.Presenter
 
         public void InsertAllCandyRef(List<CandyReference> bulkData)
         {
-            string query = sq.InsertCandyRefAndStock();
+            /*string query = sq.InsertCandyRef();
             Connect();
             using (var cmd = con.CreateCommand())
             {
@@ -179,8 +205,24 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("variant_id", OracleDbType.Int32, bulkData.Select(c => c.Variant_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("texture_id", OracleDbType.Int32, bulkData.Select(c => c.Texture_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("packaging_id", OracleDbType.Int32, bulkData.Select(c => c.Packaging_id).ToArray(), ParameterDirection.Input));
+                //cmd.Parameters.Add(new OracleParameter("stock_id", OracleDbType.Int32, bulkData.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("candy_ref_code", OracleDbType.Int32, bulkData.Select(c => c.Candy_ref_code).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();*/
+
+            string query = sq.InsertCandyStock();
+            Connect();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = bulkData.Count;
 
                 cmd.Parameters.Add(new OracleParameter("stock_id", OracleDbType.Int32, bulkData.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("stock_candy_ref_id", OracleDbType.Int32, bulkData.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input)); //x2
                 cmd.Parameters.Add(new OracleParameter("quantity_stock", OracleDbType.Int32, bulkData.Select(c => c.Candy_quantity).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
@@ -219,6 +261,26 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, country.Select(c => c.Country_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("name", OracleDbType.Varchar2, country.Select(c => c.Name).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("shipping_id", OracleDbType.Int32, country.Select(c => c.Shipping_id).ToArray(), ParameterDirection.Input));
+
+                cmd.ExecuteNonQuery();
+            }
+            Close();
+        }
+
+        public void InsertCondiMachine(List<MachinePackaging> machinePackagings)
+        {
+            string query = sq.InsertPackagingMachine();
+            Connect();
+            using (var cmd = con.CreateCommand())
+            {
+                cmd.CommandText = query;
+                cmd.CommandType = CommandType.Text;
+                cmd.BindByName = true;
+                cmd.ArrayBindCount = machinePackagings.Count;
+                cmd.Parameters.Add(new OracleParameter("machine_id", OracleDbType.Int32, machinePackagings.Select(c => c.Machine_id).ToArray(), ParameterDirection.Input)); //x2
+                cmd.Parameters.Add(new OracleParameter("id_packaging", OracleDbType.Int32, machinePackagings.Select(c => c.Packaging_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("cadence", OracleDbType.Int32, machinePackagings.Select(c => c.Cadence).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("change_tools", OracleDbType.Int32, machinePackagings.Select(c => c.Tool_change).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
             }

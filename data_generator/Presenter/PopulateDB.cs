@@ -91,6 +91,37 @@ namespace data_generator.Presenter
             }
         }
 
+        public void OpenMachineCondiCsvFile()
+        {
+            //ouvre une fenêtre de recherche de fichier avec le filtre .csv
+            OpenFileDialog xlsxPath = new OpenFileDialog
+            {
+                Filter = "fichier .csv | *.csv"
+            };
+
+            //Si un fichier est sélectionné
+            if (xlsxPath.ShowDialog() == DialogResult.OK)
+            {
+                Task insertCSV;
+                using (csvParser = new TextFieldParser(xlsxPath.FileName))
+                {
+                    //Paramètres du parser csv
+                    csvParser.CommentTokens = new string[] { commentToken };
+                    csvParser.SetDelimiters(new string[] { delimiter });
+                    csvParser.HasFieldsEnclosedInQuotes = isFieldInQuotes;
+                    if (skipHeader)
+                    {
+                        csvParser.ReadLine();
+                    }
+
+                    //lance la tâche
+                    //pour parser et inserer les données
+                    insertCSV = Task.Run(() => { PrepareMachineCondi(); });
+                    insertCSV.Wait();
+                }
+            }
+        }
+
         private void PrepareCandyData()
         {
             int id = 1;
@@ -161,8 +192,42 @@ namespace data_generator.Presenter
                     throw;
                 }
             }
-            da.InsertData();
+            //da.InsertData();
             dg.GenerateCandyReference();
+        }
+
+        private void PrepareMachineCondi()
+        {
+            List<MachinePackaging> machineCondi = new List<MachinePackaging>();
+            
+
+            int id = 1;
+            while (!csvParser.EndOfData)
+            {
+                try
+                {
+                    string[] fields = csvParser.ReadFields();
+                    for (int i = 0; i <= fields.Count() - 1; i++)
+                    {
+                        if (i == 0 && fields[i] != "")
+                        {
+                            machineCondi.Add(new MachinePackaging
+                            {
+                                Machine_id = id,
+                                Packaging_id = Convert.ToInt32(fields[1]),
+                                Cadence = Convert.ToInt32(fields[2]),
+                                Tool_change = Convert.ToInt32(fields[3])
+                            });
+                        }
+                    }
+                    id++;
+                }
+                catch (IndexOutOfRangeException)
+                {
+                    throw;
+                }
+            }
+            da.InsertCondiMachine(machineCondi);
         }
 
         private void PrepareCountryShippingData()
@@ -195,13 +260,13 @@ namespace data_generator.Presenter
                                 Quantity = Convert.ToInt32(fields[1])
                             });
                         }
-                        else if (i == 0 && fields[i] != "")
+                        else if (i == 2 && fields[i] != "")
                         {
                             country.Add(new Country
                             {
                                 Country_id = id,
                                 Name = fields[2],
-                                Shipping_id = Convert.ToInt32(from lid in shipping where lid.Name == fields[3] select lid.Shipping_id)
+                                Shipping_id = Convert.ToInt32(fields[3])
                             });
                         }
                         /*else if (i == 0 && fields[i] != "")
