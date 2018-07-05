@@ -14,7 +14,17 @@ namespace data_generator.Model
                 "(SELECT COUNT(*) FROM orders) AS orders," +
                 "(SELECT COUNT(*) FROM country) AS country, " +
                 "(SELECT COUNT(*) FROM order_details) AS od " +
-                "FROM country";
+                "FROM candy";
+        }
+
+        public string GetCandyRef()
+        {
+            return "SELECT id_candy_reference,id_packaging, id_candy FROM candy_reference";
+        }
+
+        public string GetCandyPrices()
+        {
+            return "SELECT id_candy, bag_cost, box_cost, sample_cost FROM candy";
         }
 
         public string InsertAllCandy()
@@ -67,12 +77,18 @@ namespace data_generator.Model
 
         public string InsertOrders()
         {
-            return "INSERT INTO orders VALUES(:order_id,:country_id,:customer_id,:total_price,:order_date)";
+            return "BEGIN " +
+                "INSERT INTO orders VALUES(:order_id,:country_id,:customer_id,:total_price,:order_date); " +
+                "commit; " +
+                "END;";
         }
 
         public string InsertOrdersDetails()
         {
-            return "INSERT INTO order_details VALUES(:order_line,:candy_ref_id,:order_id,:quantity)";
+            return "BEGIN " +
+                "INSERT INTO order_details VALUES(:order_line,:candy_ref_id,:order_id,:quantity);" +
+                "commit; " +
+                "END;";
         }
 
         public string InsertPackagingMachine()
@@ -82,12 +98,18 @@ namespace data_generator.Model
 
         public string InsertmmWork()
         {
-            return "INSERT INTO Machine_fab_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date)";
+            return "BEGIN " +
+                "INSERT INTO Machine_fab_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date); " +
+                "commit; " +
+                "END;";
         }
 
         public string InsertmpWork()
         {
-            return "INSERT INTO Machine_condi_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date)";
+            return "BEGIN " +
+                "INSERT INTO Machine_condi_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date); " +
+                "commit; " +
+                "END;";
         }
 
         public string GetCandySent()

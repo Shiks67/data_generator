@@ -11,20 +11,27 @@ namespace data_generator.Presenter
 {
     class DataAccess
     {
-        OracleConnection con = new OracleConnection
-        {
-            ConnectionString = "Data Source=(DESCRIPTION =" +
-                "(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.43.105)(PORT = 1521))" +
-                "(CONNECT_DATA =(SERVER = DEDICATED)" +
-                "(SERVICE_NAME = PBigData))); " +
-                "User Id=Generateur_Donnes;Password=azer123*"
-        };
+        OracleConnection con;
         SqlQuery sq = new SqlQuery();
 
         public static int nbCandy;
         public static int nbOrder;
         public static int nbOD;
         public static int nbCountry;
+        public static List<CandyRefPrice> crp;
+
+        void Connect()
+        {
+            con = new OracleConnection
+            {
+                ConnectionString = "Data Source=(DESCRIPTION =" +
+                "(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.43.105)(PORT = 1521))" +
+                "(CONNECT_DATA =(SERVER = DEDICATED)" +
+                "(SERVICE_NAME = PBigData))); " +
+                "User Id=Generateur_Donnes;Password=azer123*"
+            };
+            con.Open();
+        }
 
         void Close()
         {
@@ -32,15 +39,18 @@ namespace data_generator.Presenter
             con.Dispose();
         }
 
-        public void GetDataRows()
+        public List<CandyRefPrice> GetDataRows()
         {
-            con.Open();
+            crp = new List<CandyRefPrice>();
+            List<Candy> candyp = new List<Candy>();
+
+            Connect();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.CountCandyData();
             cmd.CommandText = query;
             OracleDataReader reader = cmd.ExecuteReader();
 
-            while(reader.Read())
+            while (reader.Read())
             {
                 nbCandy = Convert.ToInt32(reader.GetValue(0));
                 nbOrder = Convert.ToInt32(reader.GetValue(1));
@@ -48,12 +58,59 @@ namespace data_generator.Presenter
                 nbOD = Convert.ToInt32(reader.GetValue(3));
             }
             Close();
+
+            Connect();
+            cmd = con.CreateCommand();
+            query = sq.GetCandyRef();
+            cmd.CommandText = query;
+            reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                crp.Add(new CandyRefPrice
+                {
+                    Candy_ref_id = Convert.ToInt32(reader.GetValue(0)),
+                    Package_id = Convert.ToInt32(reader.GetValue(1)),
+                    Candy_id = Convert.ToInt32(reader.GetValue(2)),
+                    Price = "0"
+                });
+            }
+            Close();
+
+            Connect();
+            cmd = con.CreateCommand();
+            query = sq.GetCandyPrices();
+            cmd.CommandText = query;
+            reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                candyp.Add(new Candy
+                {
+                    candy_id = Convert.ToInt32(reader.GetValue(0)),
+                    bag_price = reader.GetValue(1).ToString(),
+                    box_price = reader.GetValue(2).ToString(),
+                    sample_price = reader.GetValue(3).ToString()
+                });
+            }
+            Close();
+
+            for (int i = 0; i < crp.Count; i++)
+            {
+                if(crp[i].Package_id == 1)
+                    crp[i].Price = candyp.Single(x => x.candy_id == crp[i].Candy_id).bag_price.ToString();
+                if (crp[i].Package_id == 2)
+                    crp[i].Price = candyp.Single(x => x.candy_id == crp[i].Candy_id).box_price.ToString();
+                if (crp[i].Package_id == 3)
+                    crp[i].Price = candyp.Single(x => x.candy_id == crp[i].Candy_id).sample_price.ToString();
+            }
+            return crp;
         }
 
         public void InsertOrder(List<Order> orders, List<OrderDetails> orderDetails)
         {
             string query = sq.InsertOrders();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -63,7 +120,7 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("order_id", OracleDbType.Int32, orders.Select(c => c.order_id).ToArray(), ParameterDirection.Input)); //x2
                 cmd.Parameters.Add(new OracleParameter("customer_id", OracleDbType.Int32, orders.Select(c => c.customer_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("country_id", OracleDbType.Int32, orders.Select(c => c.country_id).ToArray(), ParameterDirection.Input));
-                cmd.Parameters.Add(new OracleParameter("total_price", OracleDbType.Int32, orders.Select(c => c.total_price).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("total_price", OracleDbType.Decimal, orders.Select(c => c.total_price).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("order_date", OracleDbType.Varchar2, orders.Select(c => c.date).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
@@ -71,7 +128,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertOrdersDetails();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -92,7 +149,7 @@ namespace data_generator.Presenter
         public List<CandySent> GetCandyData()
         {
             List<CandySent> candySent = new List<CandySent>();
-            con.Open();
+            Connect();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.GetCandySent();
             cmd.CommandText = query;
@@ -110,14 +167,13 @@ namespace data_generator.Presenter
 
             }
             Close();
-
             return candySent;
         }
 
         public List<MachineManufacture> GetMachineManufactureData()
         {
             List<MachineManufacture> machineManufacture = new List<MachineManufacture>();
-            con.Open();
+            Connect();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.GetMachineManufacture();
             cmd.CommandText = query;
@@ -128,19 +184,20 @@ namespace data_generator.Presenter
                 machineManufacture.Add(new MachineManufacture
                 {
                     Machine_id = Convert.ToInt32(reader.GetValue(0)),
-                    candy_variant_id = Convert.ToInt32(reader.GetValue(1))
+                    candy_variant_id = Convert.ToInt32(reader.GetValue(1)),
+                    Cadence = "35",
+                    Tool_change = "35"
                 });
 
             }
             Close();
-
             return machineManufacture;
         }
 
         public List<MachinePackaging> GetMachinePackagingData()
         {
             List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
-            con.Open();
+            Connect();
             OracleCommand cmd = con.CreateCommand();
             string query = sq.GetMachinePackaging();
             cmd.CommandText = query;
@@ -151,7 +208,9 @@ namespace data_generator.Presenter
                 machinePackaging.Add(new MachinePackaging
                 {
                     Machine_id = Convert.ToInt32(reader.GetValue(0)),
-                    Packaging_id = Convert.ToInt32(reader.GetValue(1))
+                    Packaging_id = Convert.ToInt32(reader.GetValue(1)),
+                    Cadence = 35,
+                    Tool_change = 35
                 });
 
             }
@@ -163,7 +222,7 @@ namespace data_generator.Presenter
         public void InsertData()
         {
             string query = sq.InsertCandyColor();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -177,7 +236,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyVariant();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -191,7 +250,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyTexture();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -205,7 +264,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyPackaging();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -219,14 +278,14 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertAllCandy();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
                 cmd.CommandType = CommandType.Text;
                 cmd.BindByName = true;
                 cmd.ArrayBindCount = PopulateDB.candy.Count;
-                cmd.Parameters.Add(new OracleParameter("candy_id", OracleDbType.Int32, PopulateDB.candy.Select(c => c.id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("candy_id", OracleDbType.Int32, PopulateDB.candy.Select(c => c.candy_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("candy_name", OracleDbType.Varchar2, PopulateDB.candy.Select(c => c.name).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("manufacturing_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.manufacturing_cost).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("packaging_cost", OracleDbType.Int32, PopulateDB.candy.Select(c => c.packaging_cost).ToArray(), ParameterDirection.Input));
@@ -248,7 +307,7 @@ namespace data_generator.Presenter
         public void InsertAllCandyRef(List<CandyReference> bulkData)
         {
             string query = sq.InsertCandyRef();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -270,7 +329,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCandyStock();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -290,7 +349,7 @@ namespace data_generator.Presenter
         internal void InsertCountryShippingData(List<Country> country, List<Shipping> shipping)
         {
             string query = sq.InsertShipping();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -307,7 +366,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertCountry();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -327,7 +386,7 @@ namespace data_generator.Presenter
         public void InsertCondiMachine(List<MachinePackaging> machinePackagings)
         {
             string query = sq.InsertPackagingMachine();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -347,7 +406,7 @@ namespace data_generator.Presenter
         public void InsertMachineWork(List<MachineWork> mp, List<MachineWork> mm)
         {
             string query = sq.InsertmpWork();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -365,7 +424,7 @@ namespace data_generator.Presenter
             Close();
 
             query = sq.InsertmmWork();
-            con.Open();
+            Connect();
             using (var cmd = con.CreateCommand())
             {
                 cmd.CommandText = query;
@@ -390,7 +449,7 @@ namespace data_generator.Presenter
             string query = ""; //requete select des données à insert dans mongoDB
             cmd.CommandText = query;
 
-            con.Open();
+            Connect();
             OracleDataReader reader = cmd.ExecuteReader();
 
             for (int i = 0; i < reader.FieldCount; i++)

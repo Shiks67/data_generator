@@ -11,7 +11,7 @@ namespace data_generator.Model
         public int order_id { get; set; }
         public int customer_id { get; set; }
         public int country_id { get; set; }
-        public int total_price { get; set; }
+        public double total_price { get; set; }
         public string date { get; set; }
     }
 }

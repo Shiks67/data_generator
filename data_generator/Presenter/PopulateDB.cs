@@ -136,7 +136,7 @@ namespace data_generator.Presenter
                         {
                             candy.Add(new Candy
                             {
-                                id = id,
+                                candy_id = id,
                                 name = fields[0],
                                 manufacturing_cost = Convert.ToInt32(fields[1]),
                                 packaging_cost = Convert.ToInt32(fields[2]),

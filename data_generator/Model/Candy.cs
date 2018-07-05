@@ -8,7 +8,7 @@ namespace data_generator.Model
 {
     class Candy
     {
-        public int id { get; set; }
+        public int candy_id { get; set; }
         public string name { get; set; }
         public int manufacturing_cost { get; set; }
         public int packaging_cost { get; set; }

@@ -13,39 +13,45 @@ namespace data_generator.Presenter
 
         private List<Order> oList = new List<Order>();
         private List<OrderDetails> odList = new List<OrderDetails>();
-
         private List<CandyReference> allCandys = new List<CandyReference>();
+        private List<CandyRefPrice> crp = new List<CandyRefPrice>();
 
         public void GenerateOrder(int nbOrder, int nbMin, int nbMax)
         {
-            da.GetDataRows();
+            crp = da.GetDataRows();
             Random rnd = new Random();
             int odID = 0;
 
             for (int i = 0; i < nbOrder; i++)
             {
                 int ordId = DataAccess.nbOrder + i + 1;
+                int lines = rnd.Next(nbMin, nbMax);
+                double totalorderPrice = 0;
+
+                for (int y = 0; y < lines; y++)
+                {
+                    odID++;
+                    int refId = rnd.Next(1, DataAccess.nbCandy);
+                    int refq = rnd.Next(1, 5);
+                    odList.Add(new OrderDetails
+                    {
+                        order_line = odID,
+                        candy_ref_id = refId,
+                        order_id = ordId,
+                        quantity = refq
+                    });
+                    totalorderPrice += Convert.ToDouble(crp.Single(x => x.Candy_ref_id == refId).Price) * refq;
+                }
+                odID = 0;
+
                 oList.Add(new Order
                 {
                     order_id = ordId,
                     customer_id = rnd.Next(1, (nbOrder)),
                     country_id = rnd.Next(1, DataAccess.nbCountry),
-                    total_price = rnd.Next(1, 50),
+                    total_price = totalorderPrice,
                     date = rnd.Next(01, 28) + "/" + rnd.Next(01, 12) + "/" + rnd.Next(2015, 2018),
                 });
-                int lines = rnd.Next(nbMin, nbMax);
-                for (int y = 0; y < lines; y++)
-                {
-                    odID++;
-                    odList.Add(new OrderDetails
-                    {
-                        order_line = odID,
-                        candy_ref_id = rnd.Next(1, DataAccess.nbCandy),
-                        order_id = ordId,
-                        quantity = rnd.Next(1, 5)
-                    });
-                }
-                odID = 0;
             }
             da.InsertOrder(oList, odList);
             oList.Clear();
@@ -70,7 +76,7 @@ namespace data_generator.Presenter
                                 allCandys.Add(new CandyReference
                                 {
                                     Candy_ref_id = id,
-                                    Candy_id = PopulateDB.candy[a].id,
+                                    Candy_id = PopulateDB.candy[a].candy_id,
                                     Color_id = PopulateDB.color[b].id,
                                     Variant_id = PopulateDB.variant[c].id,
                                     Texture_id = PopulateDB.texture[d].id,
@@ -91,8 +97,8 @@ namespace data_generator.Presenter
             List<CandySent> candySent = new List<CandySent>();
             candySent = da.GetCandyData();
 
-            List<MachineManufacture> machineManufcature = new List<MachineManufacture>();
-            machineManufcature = da.GetMachineManufactureData();
+            List<MachineManufacture> machineManufacture = new List<MachineManufacture>();
+            machineManufacture = da.GetMachineManufactureData();
 
             List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
             machinePackaging = da.GetMachinePackagingData();
@@ -107,24 +113,27 @@ namespace data_generator.Presenter
             {
                 id++;
 
-                string d = (Convert.ToInt32(cs.Date.Split('/')[0]) - rnd.Next(1, Convert.ToInt32(cs.Date.Split('/')[0]))).ToString();
-                string m = (Convert.ToInt32(cs.Date.Split('/')[1]) - rnd.Next(1, Convert.ToInt32(cs.Date.Split('/')[1]))).ToString();
+                string d = rnd.Next(Convert.ToInt32(cs.Date.Split('/')[0])).ToString();
+                string m = cs.Date.Split('/')[1];
                 string y = cs.Date.Split('/')[2];
 
-                string date = d + m + y + " " + rnd.Next(0, 23) + ":" + rnd.Next(0, 59) + ":" + rnd.Next(0, 59);
+                string date = d + "/" + m + "/" + y + " " + rnd.Next(0, 23) + ":" + rnd.Next(0, 59) + ":" + rnd.Next(0, 59);
 
+                var machinesm = machineManufacture.Where(mm => mm.candy_variant_id == cs.Variant_id).ToList();
+                int machineToUse = rnd.Next(machinesm.Count);
                 mmWork.Add(new MachineWork
                 {
                     Id = id,
-                    Machine_id = machineManufcature.Single(mm => mm.candy_variant_id == cs.Variant_id).Machine_id,
+                    Machine_id = (machinesm)[machineToUse].Machine_id,
                     Candy_ref_id = cs.Candy_ref_id,
                     Date = date
                 });
-
+                var machinesp = machinePackaging.Where(mm => mm.Packaging_id == cs.Variant_id).ToList();
+                machineToUse = rnd.Next(machinesp.Count);
                 mpWork.Add(new MachineWork
                 {
                     Id = id,
-                    Machine_id = machinePackaging.Single(mp => mp.Packaging_id == cs.Package_id).Machine_id,
+                    Machine_id = (machinesp)[machineToUse].Machine_id,
                     Candy_ref_id = cs.Candy_ref_id,
                     Date = date
                 });
