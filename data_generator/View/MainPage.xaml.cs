@@ -33,27 +33,39 @@ namespace data_generator.View
         private void Gen_btn_Click(object sender, RoutedEventArgs e)
         {
             if(nb_order.Text != "")
-            {dg.GenerateOrder(Convert.ToInt32(nb_order.Text), Convert.ToInt32(nb_min.Text), Convert.ToInt32(nb_max.Text));}
+            {
+                Gen_btn.Background = Brushes.DarkRed;
+                dg.GenerateOrder(Convert.ToInt32(nb_order.Text), Convert.ToInt32(nb_min.Text), Convert.ToInt32(nb_max.Text), order_date.Text);
+                Gen_btn.Background = Brushes.WhiteSmoke;
+            }
         }
 
         private void Populate_btn_Click(object sender, RoutedEventArgs e)
         {
+            Populate_btn.Background = Brushes.DarkRed;
             pDB.OpenCandyCsvFile();
+            Populate_btn.Background = Brushes.WhiteSmoke;
         }
 
         private void Add_country_shipping_Click(object sender, RoutedEventArgs e)
         {
+            Add_country_shipping.Background = Brushes.DarkRed;
             pDB.OpenCountryShippingCsvFile();
+            Add_country_shipping.Background = Brushes.WhiteSmoke;
         }
 
         private void Add_machine_condi_Click(object sender, RoutedEventArgs e)
         {
+            Add_machine_condi.Background = Brushes.DarkRed;
             pDB.OpenMachineCondiCsvFile();
+            Add_machine_condi.Background = Brushes.WhiteSmoke;
         }
 
         private void gen_machine_use_Click(object sender, RoutedEventArgs e)
         {
+            gen_machine_use.Background = Brushes.DarkRed;
             dg.GenerateMachineUse();
+            gen_machine_use.Background = Brushes.WhiteSmoke;
         }
     }
 }

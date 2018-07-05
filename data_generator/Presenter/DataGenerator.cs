@@ -17,7 +17,7 @@ namespace data_generator.Presenter
         private List<CandyReference> allCandys = new List<CandyReference>();
         private List<CandyRefPrice> crp = new List<CandyRefPrice>();
 
-        public void GenerateOrder(int nbOrder, int nbMin, int nbMax)
+        public void GenerateOrder(int nbOrder, int nbMin, int nbMax, string odate)
         {
             crp = da.GetDataRows();
             Random rnd = new Random();
@@ -51,7 +51,7 @@ namespace data_generator.Presenter
                     customer_id = rnd.Next(1, (nbOrder)),
                     country_id = rnd.Next(1, DataAccess.nbCountry),
                     total_price = totalorderPrice,
-                    date = "5/7/2018"
+                    date = odate
                 });
             }
             da.InsertOrder(oList, odList);
@@ -103,11 +103,8 @@ namespace data_generator.Presenter
         public void GenerateMachineUse()
         {
             candySent = da.GetCandyData();
-
             nb_package = da.GetPackageData();
-
             machineManufacture = da.GetMachineManufactureData();
-
             machinePackaging = da.GetMachinePackagingData();
 
             int id = 0;
