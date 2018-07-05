@@ -146,6 +146,27 @@ namespace data_generator.Presenter
             Close();
         }
 
+        public List<Container> GetPackageData()
+        {
+            List<Container> nb_package = new List<Container>();
+            Connect();
+            OracleCommand cmd = con.CreateCommand();
+            string query = sq.GetPackageData();
+            cmd.CommandText = query;
+            OracleDataReader reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                nb_package.Add(new Container
+                {
+                    Packaging_id = Convert.ToInt32(reader.GetValue(0)),
+                    Quantity = Convert.ToInt32(reader.GetValue(1))
+                });
+            }
+            Close();
+            return nb_package;
+        }
+
         public List<CandySent> GetCandyData()
         {
             List<CandySent> candySent = new List<CandySent>();
@@ -162,7 +183,8 @@ namespace data_generator.Presenter
                     Candy_ref_id = Convert.ToInt32(reader.GetValue(0)),
                     Variant_id = Convert.ToInt32(reader.GetValue(1)),
                     Package_id = Convert.ToInt32(reader.GetValue(2)),
-                    Date = reader.GetValue(3).ToString()
+                    Date = reader.GetValue(3).ToString(),
+                    Quantity = Convert.ToInt32(reader.GetValue(4))
                 });
 
             }
@@ -185,8 +207,7 @@ namespace data_generator.Presenter
                 {
                     Machine_id = Convert.ToInt32(reader.GetValue(0)),
                     candy_variant_id = Convert.ToInt32(reader.GetValue(1)),
-                    Cadence = "35",
-                    Tool_change = "35"
+                    Cadence = reader.GetValue(2).ToString()
                 });
 
             }
@@ -209,8 +230,7 @@ namespace data_generator.Presenter
                 {
                     Machine_id = Convert.ToInt32(reader.GetValue(0)),
                     Packaging_id = Convert.ToInt32(reader.GetValue(1)),
-                    Cadence = 35,
-                    Tool_change = 35
+                    Cadence = Convert.ToInt32(reader.GetValue(2))
                 });
 
             }
@@ -417,6 +437,7 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, mp.Select(c => c.Id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("machine_id", OracleDbType.Int32, mp.Select(c => c.Machine_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, mp.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, mp.Select(c => c.Quantity).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("mw_date", OracleDbType.Varchar2, mp.Select(c => c.Date).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();
@@ -435,6 +456,7 @@ namespace data_generator.Presenter
                 cmd.Parameters.Add(new OracleParameter("id", OracleDbType.Int32, mm.Select(c => c.Id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("machine_id", OracleDbType.Int32, mm.Select(c => c.Machine_id).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("candy_ref_id", OracleDbType.Int32, mm.Select(c => c.Candy_ref_id).ToArray(), ParameterDirection.Input));
+                cmd.Parameters.Add(new OracleParameter("quantity", OracleDbType.Int32, mm.Select(c => c.Quantity).ToArray(), ParameterDirection.Input));
                 cmd.Parameters.Add(new OracleParameter("mw_date", OracleDbType.Varchar2, mm.Select(c => c.Date).ToArray(), ParameterDirection.Input));
 
                 cmd.ExecuteNonQuery();

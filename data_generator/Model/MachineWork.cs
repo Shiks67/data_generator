@@ -12,5 +12,6 @@ namespace data_generator.Model
         public int Machine_id { get; set; }
         public int Candy_ref_id { get; set; }
         public string Date { get; set; }
+        public int Quantity { get; set; }
     }
 }

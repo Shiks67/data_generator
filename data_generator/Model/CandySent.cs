@@ -12,5 +12,7 @@ namespace data_generator.Model
         public int Variant_id { get; set; }
         public int Package_id { get; set; }
         public string Date { get; set; }
+        public int Quantity { get; set; }
+
     }
 }

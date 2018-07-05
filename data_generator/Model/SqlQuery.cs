@@ -99,7 +99,7 @@ namespace data_generator.Model
         public string InsertmmWork()
         {
             return "BEGIN " +
-                "INSERT INTO Machine_fab_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date); " +
+                "INSERT INTO Machine_fab_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date,:quantity); " +
                 "commit; " +
                 "END;";
         }
@@ -107,27 +107,35 @@ namespace data_generator.Model
         public string InsertmpWork()
         {
             return "BEGIN " +
-                "INSERT INTO Machine_condi_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date); " +
+                "INSERT INTO Machine_condi_work VALUES (:id,:machine_id,:candy_ref_id,:mw_date,:quantity); " +
                 "commit; " +
                 "END;";
         }
 
         public string GetCandySent()
         {
-            return "SELECT id_candy_reference, (SELECT id_variant from candy_reference WHERE id_candy_reference = order_details.id_candy_reference)," +
+            return "SELECT id_candy_reference, " +
+                "(SELECT id_variant from candy_reference WHERE id_candy_reference = order_details.id_candy_reference)," +
                 "(SELECT id_packaging from candy_reference WHERE id_candy_reference = order_details.id_candy_reference), " +
-                "(SELECT order_date from orders where order_id = order_details.order_id) " +
+                "(SELECT order_date from orders where order_id = order_details.order_id), " +
+                "order_quantity " +
                 "FROM order_details";
+        }
+
+        public string GetPackageData()
+        {
+            return "SELECT id_packaging, container_quantity FROM containers";
         }
 
         public string GetMachineManufacture()
         {
-            return "SELECT id_variant, id_machine_fab FROM associe";
+            return "SELECT id_variant, associe.id_machine_fab, machine_fab.rate_fab FROM associe " +
+                "left join machine_fab ON associe.id_machine_fab = machine_fab.id_machine_fab";
         }
 
         public string GetMachinePackaging()
         {
-            return "SELECT id_machine_condi, id_packaging FROM machine_condi";
+            return "SELECT id_machine_condi, id_packaging, rate_condi FROM machine_condi";
         }
     }
 }

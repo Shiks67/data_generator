@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace data_generator.Presenter
 {
@@ -50,7 +51,7 @@ namespace data_generator.Presenter
                     customer_id = rnd.Next(1, (nbOrder)),
                     country_id = rnd.Next(1, DataAccess.nbCountry),
                     total_price = totalorderPrice,
-                    date = rnd.Next(01, 28) + "/" + rnd.Next(01, 12) + "/" + rnd.Next(2015, 2018),
+                    date = "5/7/2018"
                 });
             }
             da.InsertOrder(oList, odList);
@@ -92,19 +93,22 @@ namespace data_generator.Presenter
             da.InsertAllCandyRef(allCandys);
         }
 
+        List<CandySent> candySent = new List<CandySent>();
+        List<Container> nb_package = new List<Container>();
+        List<MachineManufacture> machineManufacture = new List<MachineManufacture>();
+        List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
+        List<MachineWork> mmWork = new List<MachineWork>();
+        List<MachineWork> mpWork = new List<MachineWork>();
+
         public void GenerateMachineUse()
         {
-            List<CandySent> candySent = new List<CandySent>();
             candySent = da.GetCandyData();
 
-            List<MachineManufacture> machineManufacture = new List<MachineManufacture>();
+            nb_package = da.GetPackageData();
+
             machineManufacture = da.GetMachineManufactureData();
 
-            List<MachinePackaging> machinePackaging = new List<MachinePackaging>();
             machinePackaging = da.GetMachinePackagingData();
-
-            List<MachineWork> mmWork = new List<MachineWork>();
-            List<MachineWork> mpWork = new List<MachineWork>();
 
             int id = 0;
             Random rnd = new Random();
@@ -117,28 +121,152 @@ namespace data_generator.Presenter
                 string m = cs.Date.Split('/')[1];
                 string y = cs.Date.Split('/')[2];
 
-                string date = d + "/" + m + "/" + y + " " + rnd.Next(0, 23) + ":" + rnd.Next(0, 59) + ":" + rnd.Next(0, 59);
+                string date = (Convert.ToInt32(d) + 1).ToString() + "/" + m + "/" + y + " 7:00:00";
 
                 var machinesm = machineManufacture.Where(mm => mm.candy_variant_id == cs.Variant_id).ToList();
                 int machineToUse = rnd.Next(machinesm.Count);
+                int nb_candy = nb_package.Single(nbp => nbp.Packaging_id == cs.Package_id).Quantity * cs.Quantity;
+
+                var machinesp = machinePackaging.Where(mm => mm.Packaging_id == cs.Variant_id).ToList();
+                int machinepToUse = rnd.Next(machinesp.Count);
+                string datef = "";
+
+                while (date != datef)
+                {
+                    datef = date;
+                    date = Verify_mmCadence(date, (machinesm)[machineToUse].Machine_id, (machinesm)[machineToUse].candy_variant_id);
+                    date = Verify_mpCadence(date, (machinesp)[machinepToUse].Machine_id);
+                }
+
                 mmWork.Add(new MachineWork
                 {
                     Id = id,
                     Machine_id = (machinesm)[machineToUse].Machine_id,
                     Candy_ref_id = cs.Candy_ref_id,
+                    Quantity = nb_candy,
                     Date = date
                 });
-                var machinesp = machinePackaging.Where(mm => mm.Packaging_id == cs.Variant_id).ToList();
-                machineToUse = rnd.Next(machinesp.Count);
+                
                 mpWork.Add(new MachineWork
                 {
                     Id = id,
-                    Machine_id = (machinesp)[machineToUse].Machine_id,
+                    Machine_id = (machinesp)[machinepToUse].Machine_id,
                     Candy_ref_id = cs.Candy_ref_id,
+                    Quantity = cs.Quantity,
                     Date = date
                 });
             }
             da.InsertMachineWork(mpWork,mmWork);
+        }
+
+        public string Verify_mmCadence(string date, int machineToUse, int variant_id)
+        {
+            var rnd = new Random();
+            var cadenceDone = mmWork.Where(mm => mm.Date == date).Where(mm => mm.Machine_id == machineToUse).ToList();
+            int total = cadenceDone.Sum(smm => smm.Quantity);
+
+            var mfirst = machineManufacture.Where(cm => cm.Machine_id == machineToUse).ToList();
+            string mfirstdisp = mfirst[rnd.Next(mfirst.Count)].Cadence;
+
+            if(mfirstdisp.Contains('/'))
+            {
+                if(variant_id == 2)
+                {
+                    mfirstdisp = mfirstdisp.Split('/')[0];
+                }
+                else
+                {
+                    mfirstdisp = mfirstdisp.Split('/')[1];
+                }
+            }
+
+            if (Convert.ToInt32(mfirstdisp) < total)
+            {
+                string day = date.Split(' ')[0];
+                string time = date.Split(' ')[1];
+                string m, d, y;
+                int hour = Convert.ToInt32(time.Split(':')[0]);
+                int minute = Convert.ToInt32(time.Split(':')[1]);
+
+                if(minute == 59)
+                {
+                    hour++;
+                    minute = 0;
+                }
+                else
+                {
+                    minute++;
+                }
+
+                if(hour == 20)
+                {
+                    d = day.Split('/')[0];
+                    m = day.Split('/')[1];
+                    y = day.Split('/')[2];
+
+                    if(Convert.ToUInt32(d) == 30)
+                    {
+                        if (Convert.ToUInt32(m) == 12)
+                        {
+                            return day = "1/1/" + (Convert.ToInt32(y) + 1).ToString() + " 7:00:00";
+                        }
+                        return day = "1/" + (Convert.ToInt32(m) + 1).ToString() + "/" + y + " 7:00:00";
+                    }
+                    else
+                    {
+                        return day = (Convert.ToInt32(d) + 1).ToString() + "/" + m + "/" + y + " 7:00:00";
+                    }
+                }
+                return day + " " + hour + ":" + minute + ":00";
+            }
+            return date;
+        }
+
+        public string Verify_mpCadence(string date, int machineToUse)
+        {
+            var cadenceDone = mpWork.Where(mm => mm.Date == date).Where(mm => mm.Machine_id == machineToUse).ToList();
+            int total = cadenceDone.Sum(smm => smm.Quantity);
+
+            if (Convert.ToInt32(machinePackaging.Single(cm => cm.Machine_id == machineToUse).Cadence) < total)
+            {
+                string day = date.Split(' ')[0];
+                string time = date.Split(' ')[1];
+                string m, d, y;
+                int hour = Convert.ToInt32(time.Split(':')[0]);
+                int minute = Convert.ToInt32(time.Split(':')[1]);
+
+                if (minute == 59)
+                {
+                    hour++;
+                    minute = 0;
+                }
+                else
+                {
+                    minute++;
+                }
+
+                if (hour == 20)
+                {
+                    d = day.Split('/')[0];
+                    m = day.Split('/')[1];
+                    y = day.Split('/')[2];
+
+                    if (Convert.ToUInt32(d) == 30)
+                    {
+                        if(Convert.ToUInt32(m) == 12)
+                        {
+                            return day = "1/1/" + (Convert.ToInt32(y) + 1).ToString() + " 7:00:00";
+                        }
+                        return day = "1/" + (Convert.ToInt32(m) + 1).ToString() + "/" + y + " 7:00:00";
+                    }
+                    else
+                    {
+                        return day = (Convert.ToInt32(d) + 1).ToString() + "/" + m + "/" + y + " 7:00:00";
+                    }
+                }
+                return day + " " + hour + ":" + minute + ":00";
+            }
+            return date;
         }
     }
 }
